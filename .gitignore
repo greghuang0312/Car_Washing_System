@@ -1,0 +1,30 @@
+# 微信小程序
+miniprogram/node_modules/
+miniprogram/.DS_Store
+
+# 云函数依赖（每个云函数单独 npm install）
+cloudfunctions/*/node_modules/
+
+# 微信开发者工具
+.idea/
+.vscode/
+*.suo
+*.user
+.editorconfig
+
+# 系统文件
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 日志
+*.log
+npm-debug.log*
+
+# 环境变量
+.env
+.env.local
+
+# Git worktrees（预留）
+.worktrees/
+worktrees/
