@@ -1,10 +1,30 @@
 {
   "version": 1,
   "skills": {
+    "auth-wechat-miniprogram": {
+      "source": "tencentcloudbase/skills",
+      "sourceType": "github",
+      "computedHash": "ac46387ad7f0c9c148df61a3f1329afc25147ab36faf481b8de8fee96f3f5dce"
+    },
+    "cloud-functions": {
+      "source": "tencentcloudbase/skills",
+      "sourceType": "github",
+      "computedHash": "c142a8610c05fae3cee9ae4037f47bb15209195f98f1faf1a468ea7e76460ec8"
+    },
+    "cloudbase-document-database-in-wechat-miniprogram": {
+      "source": "tencentcloudbase/skills",
+      "sourceType": "github",
+      "computedHash": "fdc75332263769a742477dc366af79a53f0e3634c7c45dc79718cf71eb785522"
+    },
     "find-skills": {
       "source": "vercel-labs/skills",
       "sourceType": "github",
       "computedHash": "25872a21881a950edc3db1f3329664d60405d539660ce05b3265db2de06a7dfd"
+    },
+    "miniprogram-development": {
+      "source": "tencentcloudbase/skills",
+      "sourceType": "github",
+      "computedHash": "f3562bdf07390ca07713d31bbfedc05b5b6dfdd830539f55ac5664153bb177a1"
     }
   }
 }
