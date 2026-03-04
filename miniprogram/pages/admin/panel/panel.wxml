@@ -1,0 +1,69 @@
+<view class="container">
+  <view class="tabs">
+    <view class="tab {{activeTab === 'price' ? 'active' : ''}}" bindtap="switchTab" data-tab="price">费用设置</view>
+    <view class="tab {{activeTab === 'orders' ? 'active' : ''}}" bindtap="switchTab" data-tab="orders">订单列表</view>
+    <view class="tab {{activeTab === 'stats' ? 'active' : ''}}" bindtap="switchTab" data-tab="stats">数据统计</view>
+  </view>
+
+  <view wx:if="{{activeTab === 'price'}}" class="card">
+    <text class="section-title">费用设置</text>
+    <view class="price-form">
+      <text class="form-label">单价（元/分钟）</text>
+      <input
+        class="input"
+        type="digit"
+        placeholder="请输入单价"
+        bindinput="onPriceInput"
+        value="{{priceYuan}}"
+      />
+      <button class="btn-primary" bindtap="onSavePrice" loading="{{loading}}">保存</button>
+    </view>
+  </view>
+
+  <view wx:if="{{activeTab === 'orders'}}">
+    <view class="filter-bar">
+      <picker bindchange="onStationFilter" value="{{stationIndex}}" range="{{stationOptions}}">
+        <view class="picker-btn">站点：{{stationOptions[stationIndex]}}</view>
+      </picker>
+    </view>
+
+    <view wx:if="{{orders.length === 0}}" class="empty-hint">
+      <text>暂无订单</text>
+    </view>
+
+    <view wx:for="{{orders}}" wx:key="_id" class="card order-item">
+      <view class="order-header">
+        <text class="order-station">{{item.stationId}}</text>
+        <text class="order-status status-{{item.status}}">{{item.statusText}}</text>
+      </view>
+      <view class="order-info"><text>时间：{{item.startTimeText}}</text></view>
+      <view class="order-info"><text>时长：{{item.durationText}}</text></view>
+      <view class="order-info"><text>费用：￥{{item.amountYuan}}</text></view>
+    </view>
+  </view>
+
+  <view wx:if="{{activeTab === 'stats'}}">
+    <view class="card stat-card">
+      <text class="stat-title">今日</text>
+      <text class="stat-number">￥{{stats.today.amountYuan}}</text>
+      <text class="stat-count">{{stats.today.count}} 单</text>
+    </view>
+    <view class="card stat-card">
+      <text class="stat-title">本周</text>
+      <text class="stat-number">￥{{stats.week.amountYuan}}</text>
+      <text class="stat-count">{{stats.week.count}} 单</text>
+    </view>
+    <view class="card stat-card">
+      <text class="stat-title">本月</text>
+      <text class="stat-number">￥{{stats.month.amountYuan}}</text>
+      <text class="stat-count">{{stats.month.count}} 单</text>
+    </view>
+    <view class="card stat-card">
+      <text class="stat-title">累计</text>
+      <text class="stat-number">￥{{stats.all.amountYuan}}</text>
+      <text class="stat-count">{{stats.all.count}} 单</text>
+    </view>
+
+    <button class="btn-mock" bindtap="onGenerateMock" loading="{{mockLoading}}">生成 30 条测试数据</button>
+  </view>
+</view>

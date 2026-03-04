@@ -1,0 +1,23 @@
+<view class="container">
+  <text class="section-title">我的洗车记录</text>
+
+  <view wx:if="{{orders.length === 0}}" class="empty-hint">
+    <text>暂无洗车记录</text>
+  </view>
+
+  <view wx:for="{{orders}}" wx:key="_id" class="card order-item">
+    <view class="order-header">
+      <text class="order-station">{{item.stationId}}</text>
+      <text class="order-status status-{{item.status}}">{{item.statusText}}</text>
+    </view>
+    <view class="order-info">
+      <text>时间：{{item.startTimeText}}</text>
+    </view>
+    <view class="order-info" wx:if="{{item.duration}}">
+      <text>时长：{{item.durationText}}</text>
+    </view>
+    <view class="order-info" wx:if="{{item.amount}}">
+      <text>费用：¥{{item.amountYuan}}</text>
+    </view>
+  </view>
+</view>

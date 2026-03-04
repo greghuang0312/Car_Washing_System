@@ -1,0 +1,25 @@
+<view class="container">
+  <view class="card payment-card" wx:if="{{!paid}}">
+    <text class="section-title">洗车费用</text>
+    <view class="info-row">
+      <text class="label">站点</text>
+      <text class="value">{{stationId}}</text>
+    </view>
+    <view class="info-row">
+      <text class="label">用时</text>
+      <text class="value">{{durationText}}</text>
+    </view>
+    <view class="info-row amount-row">
+      <text class="label">应付</text>
+      <text class="amount">¥ {{amountYuan}}</text>
+    </view>
+    <button class="btn-primary" bindtap="onPay" loading="{{loading}}">确认支付（模拟）</button>
+  </view>
+
+  <view class="card success-card" wx:if="{{paid}}">
+    <text class="success-icon">✓</text>
+    <text class="success-text">支付成功</text>
+    <text class="success-hint">感谢使用自助洗车服务</text>
+    <button class="btn-primary" bindtap="goHome">返回首页</button>
+  </view>
+</view>

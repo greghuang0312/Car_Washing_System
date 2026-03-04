@@ -1,0 +1,17 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/washing/washing",
+    "pages/payment/payment",
+    "pages/history/history",
+    "pages/admin/login/login",
+    "pages/admin/panel/panel"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#1890ff",
+    "navigationBarTitleText": "自助洗车",
+    "navigationBarTextStyle": "white"
+  },
+  "cloud": true
+}

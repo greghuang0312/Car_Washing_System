@@ -1,6 +1,6 @@
-# 自助洗车小程序 — 实施计划
+﻿# 自助洗车小程序 — 实施计划
 
-> **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
+> **For Claude:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development to implement this plan task-by-task.
 
 **目标：** 构建一个微信小程序 + 云开发的自助洗车管理系统，支持客户扫码洗车/支付（模拟），业主费用设置/订单管理。
 
@@ -10,7 +10,52 @@
 
 ---
 
+## 第四阶段执行方式（已选方法1）
+
+**执行方式：** subagent-driven-development
+
+**执行顺序（强制）：**
+1. 读取全量计划，提取每个 Task 的完整上下文。
+2. 每个 Task 派发一个全新 implementer 子代理执行。
+3. 先做规格评审（spec-reviewer），不通过则回到 implementer 修复。
+4. 再做代码质量评审（code-quality-reviewer），不通过则回到 implementer 修复。
+5. 双评审通过后才可标记 Task 完成并进入下一个 Task。
+6. 全部 Task 完成后执行 finishing-a-development-branch。
+
+## 阶段与 Skill 映射（强制）
+
+| 阶段 | 目标 | 必用 Skill |
+|---|---|---|
+| 需求/方案确认 | 明确范围、边界、成功标准 | brainstorming |
+| 实施计划编写 | 形成可执行 Task 清单 | writing-plans |
+| 执行阶段（方法1） | 同会话逐 Task 实施 + 双评审 | subagent-driven-development |
+| 小程序实现 | 页面、路由、调用云函数、配置 | miniprogram-development |
+| 云开发后端实现 | 云函数、数据库、权限、部署 | cloudbase-guidelines + cloud-functions + cloudbase-document-database-in-wechat-miniprogram |
+| 任务内开发循环 | 先测后改，红绿重构 | test-driven-development |
+| 任务级代码审查 | 按严重级别找问题 | requesting-code-review |
+| 缺陷处理 | 根因定位与修复闭环 | systematic-debugging |
+| 完成前验证 | 先证据后结论 | verification-before-completion |
+| 收尾合并 | 合并/PR/保留分支决策 | finishing-a-development-branch |
+
+## Task 与 Skill 对应表
+
+| Task | 主要内容 | 阶段 | 必用 Skill |
+|---|---|---|---|
+| Task 1 | 项目初始化（目录、app、全局样式） | 执行阶段 | subagent-driven-development + miniprogram-development + test-driven-development |
+| Task 2 | 云函数 startWash | 执行阶段 | subagent-driven-development + cloudbase-guidelines + cloud-functions + test-driven-development |
+| Task 3 | 云函数 endWash | 执行阶段 | 同 Task 2 |
+| Task 4 | 云函数 adminLogin/updatePrice/getOrders/getMyOrders/getStats | 执行阶段 | 同 Task 2 + cloudbase-document-database-in-wechat-miniprogram |
+| Task 5 | 云函数 generateMockData/hardwareControl | 执行阶段 | 同 Task 2 |
+| Task 6 | 客户端首页 index | 执行阶段 | subagent-driven-development + miniprogram-development + test-driven-development |
+| Task 7 | 客户端计时页 washing | 执行阶段 | 同 Task 6 |
+| Task 8 | 客户端支付页 payment | 执行阶段 | 同 Task 6 | 
+| Task 9 | 客户端历史页 history | 执行阶段 | 同 Task 6 |
+| Task 10 | 业主登录页 admin/login | 执行阶段 | subagent-driven-development + miniprogram-development + auth-wechat-miniprogram + test-driven-development |
+| Task 11 | 业主管理页 admin/panel | 执行阶段 | subagent-driven-development + miniprogram-development + cloudbase-guidelines + test-driven-development |
+| Task 12 | 二维码方案 | 收尾阶段 | verification-before-completion |
 ## Task 1: 项目初始化
+
+**Task Skill：** subagent-driven-development + miniprogram-development + test-driven-development
 
 **文件：**
 - 创建: `miniprogram/` 前端目录结构
@@ -189,7 +234,78 @@ page {
 
 ---
 
+## 云开发后端详细执行文本（Task 2 ~ Task 5）
+
+### 0) 执行前准备
+1. 在微信开发者工具中确认当前项目已开通云开发并绑定正确环境 ID。
+2. 在 miniprogram/app.js 的 wx.cloud.init({ env }) 中写入目标 env。
+3. 确认数据库集合已创建：orders、settings、admins。
+4. 手工初始化 settings/default 文档，至少包含：
+   - pricePerMinute（单位分，整数）
+   - maxDuration（单位分钟，整数）
+5. 在 admins 集合写入至少一条管理员数据（含 openid、password 或哈希、name）。
+
+### 1) 云函数目录与依赖统一规则
+1. 每个函数目录必须包含：index.js、package.json。
+2. package.json 统一依赖 wx-server-sdk。
+3. 每个函数文件固定初始化模板：
+
+```javascript
+const cloud = require('wx-server-sdk')
+cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
+const db = cloud.database()
+```
+
+4. 输入参数先校验，再访问数据库；返回结构统一：{ success, error?, data? }。
+5. 所有金额字段统一“分”为存储单位，前端仅负责显示层转换“元”。
+
+### 2) Task 2 startWash 详细步骤
+1. 校验 stationId 非空，不合法直接返回。
+2. 通过 OPENID + status=washing 查询进行中订单，存在则拒绝重复开单并返回原订单 ID。
+3. 创建新订单（status=washing，写入 startTime/serverDate）。
+4. 预留硬件控制调用点（仅注释，不接真实硬件）。
+5. 部署并在开发者工具调用测试：同一用户连续调用两次，第二次应返回“有未完成订单”。
+
+### 3) Task 3 endWash 详细步骤
+1. 按 OPENID 查询进行中订单，不存在则返回错误。
+2. 读取 settings/default，缺失配置时返回可读错误（不要静默失败）。
+3. 计算时长：ceil((now-startTime)/60000)，并执行边界保护：
+   - 最小 1 分钟
+   - 最大不超过 maxDuration
+4. 计算金额：amount = duration * pricePerMinute（单位分）。
+5. 更新订单为 completed，写入 endTime/duration/amount。
+6. 部署后做边界验证：0~1 分钟场景、超过 maxDuration 场景。
+
+### 4) Task 4 管理类函数详细步骤
+1. adminLogin：用 OPENID 验证管理员身份，再校验密码。
+2. updatePrice：
+   - 先做管理员鉴权
+   - 校验 pricePerMinute 为正整数
+   - 更新 settings/default，不存在则创建
+3. getOrders：管理员按站点、状态、时间分页查询。
+4. getMyOrders：按当前 OPENID 分页查个人订单。
+5. getStats：按今日/本周/本月/累计聚合订单数与金额。
+6. 每个函数都必须补充最少 1 个失败路径（权限不足/参数错误/无数据）验证记录。
+
+### 5) Task 5 辅助函数详细步骤
+1. generateMockData：
+   - 仅管理员可调用
+   - 支持一次生成多站点、多状态订单
+   - 输出生成数量统计
+2. hardwareControl：
+   - 保留统一入参 action/stationId
+   - 仅打印日志并返回 mock 成功，不接入真实设备
+
+### 6) 云开发部署与验证清单（每个后端 Task 都执行）
+1. 在微信开发者工具中对改动函数执行“上传并部署（云端安装依赖）”。
+2. 打开云函数日志，保留一次成功调用与一次失败调用日志证据。
+3. 在数据库中核对写入结果与字段类型（尤其 amount/duration/status）。
+4. 将验证结论记录到当前 Task 的验收结果中，再进入下一 Task。
+
+
 ## Task 2: 云函数 — startWash
+
+**Task Skill：** subagent-driven-development + cloudbase-guidelines + cloud-functions + test-driven-development
 
 **文件：**
 - 创建: `cloudfunctions/startWash/index.js`
@@ -259,6 +375,8 @@ exports.main = async (event, context) => {
 ---
 
 ## Task 3: 云函数 — endWash
+
+**Task Skill：** subagent-driven-development + cloudbase-guidelines + cloud-functions + test-driven-development
 
 **文件：**
 - 创建: `cloudfunctions/endWash/index.js`
@@ -333,6 +451,8 @@ exports.main = async (event, context) => {
 ---
 
 ## Task 4: 云函数 — adminLogin / updatePrice / getOrders / getMyOrders / getStats
+
+**Task Skill：** subagent-driven-development + cloudbase-guidelines + cloud-functions + cloudbase-document-database-in-wechat-miniprogram + test-driven-development
 
 **文件：**
 - 创建: `cloudfunctions/adminLogin/index.js`
@@ -525,6 +645,8 @@ exports.main = async (event, context) => {
 
 ## Task 5: 云函数 — generateMockData / hardwareControl
 
+**Task Skill：** subagent-driven-development + cloudbase-guidelines + cloud-functions + test-driven-development
+
 **文件：**
 - 创建: `cloudfunctions/generateMockData/index.js`
 - 创建: `cloudfunctions/hardwareControl/index.js`
@@ -606,6 +728,8 @@ exports.main = async (event, context) => {
 ---
 
 ## Task 6: 客户端页面 — 首页（index）
+
+**Task Skill：** subagent-driven-development + miniprogram-development + test-driven-development
 
 **文件：**
 - 创建: `miniprogram/pages/index/index.wxml`
@@ -852,6 +976,8 @@ Page({
 
 ## Task 7: 客户端页面 — 洗车计时（washing）
 
+**Task Skill：** subagent-driven-development + miniprogram-development + test-driven-development
+
 **文件：**
 - 创建: `miniprogram/pages/washing/washing.wxml`
 - 创建: `miniprogram/pages/washing/washing.js`
@@ -865,6 +991,8 @@ Page({
 ---
 
 ## Task 8: 客户端页面 — 模拟支付（payment）
+
+**Task Skill：** subagent-driven-development + miniprogram-development + test-driven-development
 
 **文件：**
 - 创建: `miniprogram/pages/payment/payment.wxml`
@@ -1014,6 +1142,8 @@ Page({
 
 ## Task 9: 客户端页面 — 历史订单（history）
 
+**Task Skill：** subagent-driven-development + miniprogram-development + test-driven-development
+
 **文件：**
 - 创建: `miniprogram/pages/history/history.wxml`
 - 创建: `miniprogram/pages/history/history.js`
@@ -1119,6 +1249,8 @@ Page({
 
 ## Task 10: 业主端页面 — 登录（admin/login）
 
+**Task Skill：** subagent-driven-development + miniprogram-development + auth-wechat-miniprogram + test-driven-development
+
 **文件：**
 - 创建: `miniprogram/pages/admin/login/login.wxml`
 - 创建: `miniprogram/pages/admin/login/login.js`
@@ -1200,6 +1332,8 @@ Page({
 ---
 
 ## Task 11: 业主端页面 — 管理面板（admin/panel）
+
+**Task Skill：** subagent-driven-development + miniprogram-development + cloudbase-guidelines + test-driven-development
 
 **文件：**
 - 创建: `miniprogram/pages/admin/panel/panel.wxml`
@@ -1536,6 +1670,8 @@ Page({
 
 ## Task 12: 二维码生成方案
 
+**Task Skill：** verification-before-completion
+
 **说明：** 无需代码开发，只需在微信小程序管理后台手动生成。
 
 **Step 1: 生成两个测试二维码**
@@ -1583,3 +1719,4 @@ Page({
 2. **Parallel Session（新会话）** — 在新会话中使用 executing-plans 技能，分批执行并设置人工检查点
 
 **你选择哪种方式？**
+

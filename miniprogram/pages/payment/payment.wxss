@@ -1,0 +1,56 @@
+.payment-card {
+  text-align: center;
+  padding: 40rpx;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 16rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.label {
+  color: #999;
+}
+
+.value {
+  color: #333;
+  font-weight: 500;
+}
+
+.amount-row {
+  margin: 20rpx 0 30rpx;
+  border-bottom: none;
+}
+
+.amount {
+  color: #ff4d4f;
+  font-size: 48rpx;
+  font-weight: bold;
+}
+
+.success-card {
+  text-align: center;
+  padding: 60rpx 40rpx;
+}
+
+.success-icon {
+  display: block;
+  font-size: 100rpx;
+  color: #52c41a;
+  margin-bottom: 20rpx;
+}
+
+.success-text {
+  display: block;
+  font-size: 40rpx;
+  font-weight: bold;
+  margin-bottom: 10rpx;
+}
+
+.success-hint {
+  display: block;
+  color: #999;
+  margin-bottom: 40rpx;
+}

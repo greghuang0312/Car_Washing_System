@@ -1,0 +1,52 @@
+.washing-card {
+  margin-top: 20rpx;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.label {
+  color: #6b7280;
+  font-size: 28rpx;
+}
+
+.value {
+  color: #1f2937;
+  font-size: 28rpx;
+  max-width: 70%;
+  text-align: right;
+}
+
+.timer-row {
+  margin-bottom: 20rpx;
+}
+
+.timer {
+  color: #ef4444;
+  font-size: 36rpx;
+  font-weight: 700;
+}
+
+.empty-card {
+  margin-top: 40rpx;
+  text-align: center;
+}
+
+.empty-title {
+  display: block;
+  font-size: 34rpx;
+  color: #111827;
+  margin-bottom: 12rpx;
+}
+
+.empty-hint {
+  display: block;
+  font-size: 26rpx;
+  color: #9ca3af;
+  margin-bottom: 28rpx;
+}

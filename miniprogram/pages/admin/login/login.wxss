@@ -1,0 +1,13 @@
+.login-card {
+  margin-top: 100rpx;
+  padding: 40rpx;
+  text-align: center;
+}
+
+.input {
+  border: 2rpx solid #ddd;
+  border-radius: 12rpx;
+  padding: 20rpx 24rpx;
+  margin: 30rpx 0;
+  font-size: 30rpx;
+}

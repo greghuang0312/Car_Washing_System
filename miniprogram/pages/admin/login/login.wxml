@@ -1,0 +1,14 @@
+<view class="container">
+  <view class="card login-card">
+    <text class="section-title">业主登录</text>
+    <input
+      class="input"
+      type="text"
+      password
+      placeholder="请输入管理密码"
+      bindinput="onPasswordInput"
+      value="{{password}}"
+    />
+    <button class="btn-primary" bindtap="onLogin" loading="{{loading}}">登录</button>
+  </view>
+</view>

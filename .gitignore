@@ -24,6 +24,8 @@ npm-debug.log*
 # 环境变量
 .env
 .env.local
+project.private.config.json
+miniprogram/config/private.js
 
 # Git worktrees（预留）
 .worktrees/

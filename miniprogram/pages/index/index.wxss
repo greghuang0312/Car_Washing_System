@@ -1,0 +1,61 @@
+.hero-card {
+  text-align: center;
+  margin-top: 16rpx;
+}
+
+.hero-title {
+  font-size: 48rpx;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.hero-station {
+  display: block;
+  margin-top: 12rpx;
+  font-size: 28rpx;
+  color: #6b7280;
+}
+
+.action-card {
+  margin-top: 20rpx;
+}
+
+.action-hint {
+  display: block;
+  font-size: 30rpx;
+  color: #374151;
+  margin-bottom: 20rpx;
+}
+
+.price-info {
+  display: block;
+  font-size: 26rpx;
+  color: #6b7280;
+  margin-bottom: 20rpx;
+}
+
+.timer-text {
+  display: block;
+  font-size: 34rpx;
+  font-weight: 600;
+  color: #ef4444;
+  margin: 10rpx 0 24rpx;
+}
+
+.bottom-links {
+  margin-top: 30rpx;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20rpx;
+}
+
+.link {
+  font-size: 28rpx;
+  color: #1890ff;
+}
+
+.divider {
+  color: #9ca3af;
+  font-size: 26rpx;
+}
