@@ -96,6 +96,8 @@ Page({
       }
     } catch (err) {
       // no-op; keep current UI state
+    } finally {
+      this.setData({ pageLoading: false })
     }
   },
 

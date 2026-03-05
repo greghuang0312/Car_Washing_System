@@ -12,19 +12,14 @@ try {
 async function adminLogin({ db, getWXContext, event }) {
   const wxContext = getWXContext()
   const openid = wxContext.OPENID
-  const { password } = event || {}
 
   const result = await db.collection('admins').where({ openid }).get()
   if (result.data.length === 0) {
-    return { success: false, error: '无管理权限' }
+    return { success: false, error: '无管理权限', openid }
   }
 
   const admin = result.data[0]
-  if (admin.password !== password) {
-    return { success: false, error: '密码错误' }
-  }
-
-  return { success: true, name: admin.name }
+  return { success: true, name: admin.name, openid }
 }
 
 exports.main = async (event) => {

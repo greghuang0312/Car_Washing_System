@@ -2,25 +2,15 @@ const app = getApp()
 
 Page({
   data: {
-    password: '',
     loading: false
   },
 
-  onPasswordInput(e) {
-    this.setData({ password: e.detail.value })
-  },
-
   async onLogin() {
-    if (!this.data.password) {
-      wx.showToast({ title: '请输入密码', icon: 'none' })
-      return
-    }
-
     this.setData({ loading: true })
     try {
       const res = await wx.cloud.callFunction({
         name: 'adminLogin',
-        data: { password: this.data.password }
+        data: {}
       })
       const result = (res && res.result) || {}
       if (result.success) {
