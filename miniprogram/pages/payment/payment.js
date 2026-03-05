@@ -37,11 +37,11 @@ Page({
           paidAt: db.serverDate()
         }
       })
-      this.setData({ paid: true })
+      this.setData({ paid: true, loading: false })
     } catch (err) {
       wx.showToast({ title: '支付失败', icon: 'none' })
+      this.setData({ loading: false })
     }
-    this.setData({ loading: false })
   },
 
   goHome() {

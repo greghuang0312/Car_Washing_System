@@ -31,21 +31,22 @@ async function startWash({ db, getWXContext, event }) {
     }
   }
 
+  const now = new Date()
   const result = await db.collection('orders').add({
     data: {
       openid,
       stationId,
       status: 'washing',
-      startTime: db.serverDate(),
+      startTime: now,
       endTime: null,
       duration: 0,
       amount: 0,
       paidAt: null,
-      createdAt: db.serverDate()
+      createdAt: now
     }
   })
 
-  return { success: true, orderId: result._id }
+  return { success: true, orderId: result._id, startTime: now.toISOString() }
 }
 
 exports.main = async (event) => {

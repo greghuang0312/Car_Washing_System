@@ -4,13 +4,16 @@
     <text wx:if="{{stationId}}" class="hero-station">站点：{{stationId}}</text>
   </view>
 
-  <view wx:if="{{!hasActiveOrder}}" class="card action-card">
-    <text class="action-hint">扫码后可开始洗车</text>
+  <view wx:if="{{pageLoading}}" class="card action-card">
+    <text class="action-hint">加载中…</text>
+  </view>
+
+  <view wx:elif="{{!hasActiveOrder}}" class="card action-card">
     <text wx:if="{{price}}" class="price-info">当前费用：{{price}} 元/分钟</text>
     <button class="btn-primary" loading="{{loading}}" bindtap="onStartWash">开始洗车</button>
   </view>
 
-  <view wx:if="{{hasActiveOrder}}" class="card action-card">
+  <view wx:elif="{{hasActiveOrder}}" class="card action-card">
     <text class="action-hint">洗车进行中</text>
     <text class="timer-text">已用时：{{elapsedTime}}</text>
     <button class="btn-danger" loading="{{loading}}" bindtap="onEndWash">结束洗车</button>

@@ -19,6 +19,7 @@ Page({
     this.setData({ orderId, stationId, activeStartTime })
 
     if (activeStartTime) {
+      this._orderReady = true
       this.setData({ hasActiveOrder: true })
       this.updateElapsedTime()
       this.startTimer()
@@ -28,9 +29,8 @@ Page({
   },
 
   onShow() {
-    if (!this.data.hasActiveOrder) {
-      this.fetchActiveOrder()
-    }
+    if (this._orderReady || this.data.hasActiveOrder) return
+    this.fetchActiveOrder()
   },
 
   onUnload() {
@@ -107,6 +107,7 @@ Page({
 
   async onEndWash() {
     this.setData({ loading: true })
+    let navigated = false
     try {
       const res = await wx.cloud.callFunction({
         name: 'endWash',
@@ -115,16 +116,20 @@ Page({
       const result = res && res.result ? res.result : {}
       if (result.success) {
         this.stopTimer()
-        wx.navigateTo({
+        navigated = true
+        wx.redirectTo({
           url: `/pages/payment/payment?orderId=${result.orderId}&duration=${result.duration}&amount=${result.amount}&stationId=${result.stationId}`
         })
+        return
       } else {
         wx.showToast({ title: result.error || '结束洗车失败', icon: 'none' })
       }
     } catch (err) {
       wx.showToast({ title: '结束洗车失败', icon: 'none' })
     } finally {
-      this.setData({ loading: false })
+      if (!navigated) {
+        this.setData({ loading: false })
+      }
     }
   },
 

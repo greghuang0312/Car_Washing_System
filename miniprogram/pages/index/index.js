@@ -9,17 +9,36 @@ Page({
     elapsedTime: '0分钟',
     price: '',
     loading: false,
+    pageLoading: true,
     timerId: null
   },
 
   onLoad(options) {
-    const stationId = (options && options.stationId) || ''
+    let stationId = (options && options.stationId) || ''
+
+    // 支持扫「不限制的小程序码（B接口）」进入，参数存在 scene 中
+    if (!stationId && options && options.scene) {
+      const scene = decodeURIComponent(options.scene)
+      if (scene.includes('=')) {
+        const params = scene.split('&').reduce((acc, current) => {
+          const [key, value] = current.split('=')
+          if (key) acc[key] = value
+          return acc
+        }, {})
+        stationId = params.stationId || ''
+      } else {
+        stationId = scene
+      }
+    }
+
     this.setData({ stationId })
+    this._loadedOnce = false
     this.loadPrice()
-    this.checkActiveOrder()
+    this.checkActiveOrder().then(() => { this._loadedOnce = true })
   },
 
   onShow() {
+    if (!this._loadedOnce) return
     this.checkActiveOrder()
   },
 
@@ -49,6 +68,7 @@ Page({
   },
 
   async checkActiveOrder() {
+    this.setData({ pageLoading: true })
     try {
       const res = await wx.cloud.callFunction({
         name: 'getMyOrders',
@@ -121,8 +141,14 @@ Page({
       const result = res && res.result ? res.result : {}
 
       if (result.success) {
+        // 开卷帘门（异步，失败不阻断流程）
+        wx.cloud.callFunction({
+          name: 'hardwareControl',
+          data: { action: 'open', stationId: this.data.stationId }
+        }).catch(err => console.warn('hardwareControl failed:', err))
+
         wx.navigateTo({
-          url: `/pages/washing/washing?orderId=${result.orderId}&stationId=${this.data.stationId}`
+          url: `/pages/washing/washing?orderId=${result.orderId}&stationId=${this.data.stationId}&startTime=${result.startTime}`
         })
       } else {
         wx.showToast({ title: result.error || '开始洗车失败', icon: 'none' })
